@@ -1,81 +1,61 @@
-const { Circle, Rectangle, Triangle } = require("./lib/shapes.js");
+//Importing the shapes, inquirer, default svg and fs 
+const { Circle, Triangle, Rectangle } = require('./lib/shapes.js')
 const inquirer = require("inquirer");
+const Svg = require("./lib/svg.js");
 const { writeFile } = require('fs');
-
-class Svg {
-    constructor() {
-        this.textElement = ''
-        this.shapeElement = ''
-    }
-    render() {
-
-        return `<svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="300" height="200">${this.shapeElement}${this.textElement}</svg>`
-    }
-    setTextElement(text, color) {
-        this.textElement = `<text x="150" y="125" font-size="60" text-anchor="middle" fill="${color}">${text}</text>`
-    }
-    setShapeElement(shape) {
-        this.shapeElement = shape.render()
-
-    }
-
-}
 
 const textLength = (input) => {
     if (input.length > 4 || input.length === 0) {
 
-        return "Please enter (3) characters or less"
+        return "You must use 1-3 Characters only for text!"
     }
     return true
 }
 
+// Prompts inputs for creating the shapes
 const startPrompt = async () => {
 
     try {
         const initialPrompt = await inquirer
-
             .prompt([
                 {
-                    type: "input",
-                    name: "text",
-                    message: "Enter Text: Must be NO MORE than (3) characters:",
-                    validate: textLength,
+                    type: 'list',
+                    name: 'shape',
+                    message: 'What shape would you like to use?',
+                    choices: ['circle', 'rectangle', 'triangle'],
+
                 },
                 {
-                    type: "input",
-                    name: "textColor",
-                    message: "Enter a color for your text:",
+                    type: 'input',
+                    name: 'text',
+                    message: 'What text would you like to in your shape?(up to 3 Characters only)',
+                    validate: textLength
                 },
                 {
-                    type: "list",
-                    name: "shape",
-                    message: ["Circle", "Rectangle", "Triangle"],
+                    type: 'input',
+                    name: 'textColor',
+                    message: 'what text color you would like to use',
                 },
                 {
-                    type: "input",
-                    name: "shapeColor",
-                    message: "Enter a color for your shape"
-                }
+                    type: 'input',
+                    name: 'shapeColor',
+                    message: 'what shape color you would like to use',
+                },
             ])
 
-        console.log(text)
-        console.log(textColor)
-        console.log(shape)
-        console.log(shapeColor)
-
-
+        // Rendering in what shape you picked from shapes.js classes
         let shape;
         switch (initialPrompt.shape) {
 
-            case "Circle":
+            case "circle":
                 shape = new Circle()
 
                 break;
-            case "Rectangle":
+            case "rectangle":
                 shape = new Rectangle()
 
                 break;
-            case "Triangle":
+            case "triangle":
                 shape = new Triangle()
 
                 break;
@@ -83,16 +63,16 @@ const startPrompt = async () => {
             default:
                 throw Error("Error creating the SVG Shape")
         }
-
+        // Rendering in all of the other input from initialPrompt
         if (initialPrompt.shapeColor !== "") {
             shape.setColor(initialPrompt.shapeColor)
         }
-        let svg = new Svg();
-        svg.setTextElement(initialPrompt.text, initialPrompt.textColor);
-        svg.setShapeElement(shape);
-        svgString = svg.render()
-        console.log("logo.svg has been created!");
+        const svg = new Svg()
+        svg.setShapeElement(shape)
+        svg.setTextElement(initialPrompt.text, initialPrompt.textColor)
+        console.log("Generated logo.svg")
 
+        // Creating the file of shape.svg
         writeFile("logo.svg", svg.render(), (err) => {
             if (err)
                 console.log(err)
@@ -106,8 +86,10 @@ const startPrompt = async () => {
 }
 
 
+// To start the functions when you type npm start
 function main() {
-    startPrompt()
-}
 
+    startPrompt()
+
+}
 main();
